@@ -60,5 +60,87 @@ class MockRequest {
 }
 
 ////////////////////////////////////////
-////////// Completion Blocks ///////////
+////////// Closure Callback ////////////
 ////////////////////////////////////////
+
+class ViewModel {
+    typealias RequestHandler = (String) -> ()
+    var communication: RequestHandler?
+    
+    enum CommunicationStatus {
+        case on(String)
+        case off
+    }
+    
+    let communicationStatus: CommunicationStatus = .on("Info received")
+    
+    func communicateWithViewModel() {
+        switch communicationStatus {
+        case .on(let info):
+            communication?(info)
+        case .off:
+            print("Communication is off")
+        }
+    }
+}
+
+class ViewController {
+    let viewModel = ViewModel()
+    var info: String?
+    
+    init() {
+        // assign the content of the function for when it's called in the ViewModel
+        viewModel.communication = { [weak self] info in
+            guard let self = self else { return }
+            self.info = info
+        }
+    }
+}
+
+let viewController = ViewController()
+print(viewController.info as Any)
+viewController.viewModel.communicateWithViewModel()
+print(viewController.info as Any)
+
+////////////////////////////////////////
+////////// Completion Block ////////////
+////////////////////////////////////////
+
+typealias Comunicate = (String) -> ()
+
+class ViewModel2 {
+    
+    enum CommunicationStatus {
+        case on(String)
+        case off
+    }
+    
+    let communicationStatus: CommunicationStatus = .on("Info received")
+    
+    func communicateWithViewModel(completion: Comunicate) {
+        switch communicationStatus {
+        case .on(let info):
+            completion(info)
+        case .off:
+            print("Communication is off")
+        }
+    }
+}
+
+class ViewController2 {
+    let viewModel = ViewModel2()
+    var info: String?
+    
+    init() {
+        
+        let completion: Comunicate = { [weak self] info in
+            guard let self = self else { return }
+            self.info = info
+        }
+        
+        viewModel.communicateWithViewModel(completion: completion)
+    }
+}
+
+let viewController2 = ViewController2()
+print(viewController2.info as Any)
